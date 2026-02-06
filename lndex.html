@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>小三月服务器规则</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 50px 20px;
+            font-family: "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #2C3E50, #1A1A2E, #2C3E50);
+            color: #fff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        #introScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #2C3E50, #1A1A2E, #2C3E50);
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        #introScreen h1 {
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 5px;
+            background: linear-gradient(90deg, #FF99CC, #66CCFF, #FFCC99);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(255, 153, 204, 0.7);
+            margin-bottom: 20px;
+        }
+
+        #introScreen p {
+            font-size: 20px;
+            color: #FF99CC;
+            font-style: italic;
+            text-shadow: 0 0 5px #66CCFF;
+        }
+
+        #progressBar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 400px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        #progressFill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #FF66CC, #FFCC66);
+            border-radius: 10px;
+            transition: width 0.1s linear;
+        }
+
+        #mainContent {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            width: 100%;
+            padding-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #mainContent.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .b-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .b-container:hover {
+            transform: scale(1.02);
+        }
+
+        .b {
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 5px;
+            background: linear-gradient(90deg, #FF99CC, #66CCFF, #FFCC99);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(255, 153, 204, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .tagline {
+            font-size: 20px;
+            color: #FF99CC;
+            font-style: italic;
+            text-shadow: 0 0 5px #66CCFF;
+            min-width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .emoji {
+            font-size: 32px;
+            animation: blink 5s infinite;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.9); }
+        }
+
+        .emoji.special, .tagline.special {
+            font-size: 36px !important;
+            text-shadow: 0 0 20px #FF66CC !important;
+        }
+
+        .q { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #FF99CC; 
+            letter-spacing: 2px; 
+            margin-bottom: 30px; 
+            text-shadow: 0 0 10px #66CCFF; 
+        }
+
+        .rules-container {
+            width: 80%; 
+            max-width: 700px; 
+            opacity: 1;
+            height: auto;
+            transition: opacity 0.5s ease;
+            margin: 0 auto; 
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+        }
+
+        /* --- 规则卡片：灰色背景 --- */
+        .rule-card {
+            background: #e0e0e0; /* 标准浅灰背景 */
+            background-image: linear-gradient(90deg, #00FFFF, #FF69B4, #00FFFF); 
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.2); 
+            border: 2px solid #999999; 
+            border-radius: 15px;
+            padding: 20px 30px;
+            font-size: 22px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden; /* 关键：限制图标在卡片内 */
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+            width: 100%; 
+            margin-bottom: 20px; 
+            /* --- 添加相对定位，方便图标定位 --- */
+            position: relative;
+        }
+
+        .rule-card:hover {
+            border-color: #666666;
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .rule-number {
+            background: linear-gradient(90deg, #00FFFF, #FF69B4, #00FFFF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* --- 唯一的掉落图标样式 (绝对定位) --- */
+        .particle {
+            position: absolute;
+            top: -20px; /* 从卡片顶部上方开始掉 */
+            opacity: 0;
+            pointer-events: none; /* 鼠标不会碰到图标导致移出事件 */
+            user-select: none;
+            font-size: 16px;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { 
+                transform: translateY(0) rotate(0deg); 
+                opacity: 0;
+            }
+            10% { 
+                opacity: 1; /* 出现 */
+            }
+            90% { 
+                opacity: 0.8;
+            }
+            100% { 
+                transform: translateY(100px) rotate(360deg); 
+                opacity: 0; /* 消失 */
+            }
+        }
+
+        .f { 
+            color: #66CCFF; 
+            font-style: italic; 
+            margin-top: 30px; 
+            font-size: 18px;
+            opacity: 0.8;
+            text-align: center;
+            width: 80%;
+            max-width: 700px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="introScreen">
+        <h1>小三月服务器规则</h1>
+        <p>点这里开启冒险~ ✧⁺⸜(●˙▾˙●)⸝⁺✧</p>
+    </div>
+
+    <div id="progressBar">
+        <div id="progressFill"></div>
+    </div>
+
+    <div id="mainContent">
+        <div class="b-container" id="titleContainer">
+            <div class="tagline" id="dynamicTagline">今日也要开心哦~</div>
+            <div class="b">小三月服务器规则</div>
+            <div class="emoji" id="dynamicEmoji">◕‿◕✿</div>
+        </div>
+
+        <div class="q">QQ群号：1078675658</div>
+
+        <div class="rules-container" id="rulesContainer">
+            <!-- --- 数据图标属性 (data-icon) --- -->
+            <div class="rule-card" data-icon="★"><span class="rule-number">1.</span> 禁止侮辱歧视等行为。</div>
+            <div class="rule-card" data-icon="☾"><span class="rule-number">2.</span> 禁止阴间播放让人反感的音频，如果被制止请立刻停止播放!</div>
+            <div class="rule-card" data-icon="❤"><span class="rule-number">3.</span> 禁止开外挂，如果被抓封禁11454年。</div>
+            <div class="rule-card" data-icon="✿"><span class="rule-number">4.</span> 禁止914 抢东西。</div>
+            <div class="rule-card" data-icon="⚡"><span class="rule-number">5.</span> 九尾/保安/混沌禁止乱杀无枪械的DD/博士，判断标准拿起武器就可以击杀包括914（不包括电炮），可以杀不听指挥的人但不可以命令自杀.探路.要东西等，不可以在危险情况绑人，绑人后不可以抢东西。</div>
+            <div class="rule-card" data-icon="☃"><span class="rule-number">6.</span> DD/博士不能在清收互相攻击，规定范围清收电梯门。</div>
+            <div class="rule-card" data-icon="☢"><span class="rule-number">7.</span> 禁止退服雷!!!</div>
+            <div class="rule-card" data-icon="☯"><span class="rule-number">8.</span> 禁止079内鬼行为，如不配和锁队友门。</div>
+            <div class="rule-card" data-icon="♚"><span class="rule-number">9.</span> 禁止小僵尸的内鬼行为，如玩核弹。</div>
+        </div>
+        
+        <p class="f">此规则最终解释权归群主和最高管理员所有。</p>
+    </div>
+
+    <script>
+        // --- 文案库 (双击切换用) ---
+        const taglines = [
+            "摸摸头，别紧张啦~", 
+            "开心每一天我只希望看到你的笑容！", 
+            "管理员也是小可爱",
+            "今天也是元气满满的一天！", 
+            "嘿嘿，被你发现啦~", 
+            "要乖乖的哦 (ฅ•.•ฅ)"
+        ];
+        const emojis = [
+            "(。・ω・。)zZ", 
+            "(๑•̀ㅂ•́)و✧", 
+            "(*≧ｍ≦*)",   
+            "٩(ˊᗜˋ*)و",   
+            "=w=",         
+            "☜(ˆ▽ˆ)ﾉ",    
+            "(。-`ω´-)",
+            "◕‿◕✿"
+        ];
+
+        // --- 特殊内容 (长按20秒后触发的可爱彩蛋) ---
+        const specialContent = {
+            emoji: "😽", 
+            text: "喵呜~ 给你一个存档的亲亲！"
+        };
+
+        // --- 元素获取 ---
+        const introScreen = document.getElementById('introScreen');
+        const mainContent = document.getElementById('mainContent');
+        const titleContainer = document.getElementById('titleContainer');
+        const emojiElement = document.getElementById('dynamicEmoji');
+        const taglineElement = document.getElementById('dynamicTagline');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        // --- 状态管理 ---
+        let isSpecial = false; 
+        let isSad = false; 
+        let sadTimer; 
+        let longPressTimer = null;
+        let isMouseDown = false;
+
+        // --- 点击引导页开始 ---
+        introScreen.addEventListener('click', function() {
+            introScreen.style.opacity = '0';
+            setTimeout(() => {
+                introScreen.style.display = 'none';
+                mainContent.classList.add('active');
+                document.body.style.overflow = 'auto';
+                setRandomContent(); 
+                setInterval(setRandomContent, 3000);
+            }, 500);
+        });
+
+        // --- 函数定义 ---
+        function setRandomContent() {
+            if (!isSpecial && !isSad) {
+                const randomTag = taglines[Math.floor(Math.random() * taglines.length)];
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                taglineElement.textContent = randomTag;
+                emojiElement.textContent = randomEmoji;
+                emojiElement.classList.remove('special');
+                taglineElement.classList.remove('special');
+                emojiElement.classList.remove('sad');
+                taglineElement.classList.remove('sad');
+                document.querySelector('.b').classList.remove('sad');
+            }
+        }
+
+        // --- 长按逻辑 (20秒) ---
+        titleContainer.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            isMouseDown = true;
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+            longPressTimer = setInterval(() => {
+                if (!isMouseDown) return;
+                const elapsed = (longPressTimer._count || 1) * 100;
+                longPressTimer._count = (longPressTimer._count || 1) + 1;
+                const progress = Math.min((elapsed / 20000) * 100, 100);
+                progressFill.style.width = progress + '%';
+                if (elapsed >= 20000) {
+                    clearInterval(longPressTimer);
+                    triggerSpecial();
+                }
+            }, 100);
+        });
+
+        ['mouseup', 'mouseleave'].forEach(event => {
+            titleContainer.addEventListener(event, endLongPress);
+        });
+
+        function endLongPress() {
+            isMouseDown = false;
+            if (longPressTimer) {
+                clearInterval(longPressTimer);
+                longPressTimer._count = undefined;
+            }
+            setTimeout(() => {
+                if (!isSpecial && !isSad) { 
+                    progressBar.style.display = 'none';
+                }
+            }, 500);
+        }
+
+        function triggerSpecial() {
+            isSpecial = true;
+            isMouseDown = false;
+            progressBar.style.display = 'none';
+            emojiElement.textContent = specialContent.emoji;
+            taglineElement.textContent = specialContent.text;
+            emojiElement.classList.add('special');
+            taglineElement.classList.add('special');
+            setTimeout(() => {
+                isSpecial = false;
+                setRandomContent();
+            }, 5000);
+        }
+
+        // --- 核心修复：双击互动逻辑 ---
+        titleContainer.addEventListener('dblclick', function() {
+            if (isSpecial) return;
+            if (sadTimer) clearTimeout(sadTimer);
+            if (isSad) {
+                taglineElement.textContent = "╥﹏╥... 我这就走...";
+                emojiElement.textContent = "╥﹏╥";
+                setTimeout(() => {
+                    location.reload(); 
+                }, 1500);
+            } else {
+                isSad = true;
+                taglineElement.textContent = "呜...怎么了嘛...";
+                emojiElement.textContent = "(´;ω;`)";
+                [taglineElement, emojiElement, document.querySelector('.b')].forEach(el => {
+                    el.classList.add('sad');
+                });
+                sadTimer = setTimeout(() => {
+                    isSad = false;
+                    [taglineElement, emojiElement, document.querySelector('.b')].forEach(el => {
+                        el.classList.remove('sad');
+                    });
+                    setRandomContent(); 
+                }, 20000);
+            }
+        });
+
+        // --- 新增：规则卡片掉落图标效果 ---
+        document.querySelectorAll('.rule-card').forEach(card => {
+            let intervalId; // 用来存储定时器ID
+
+            card.addEventListener('mouseenter', function() {
+                // 获取当前卡片定义的图标
+                const icon = this.getAttribute('data-icon');
+                
+                // 设置一个定时器，每隔 200毫秒 掉一个图标
+                intervalId = setInterval(() => {
+                    createParticle(this, icon);
+                }, 200);
+            });
+
+            card.addEventListener('mouseleave', function() {
+                // 鼠标移开时，清除定时器，停止掉图标
+                clearInterval(intervalId);
+            });
+        });
+
+        // 创建单个图标元素的函数
+        function createParticle(card, icon) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.textContent = icon;
+
+            // --- 随机水平位置 (在卡片宽度内) ---
+            const cardRect = card.getBoundingClientRect();
+            const randomX = Math.random() * cardRect.width;
+            particle.style.left = `${randomX}px`;
+
+            // --- 随机动画时长 (0.8s - 1.5s) ---
+            const duration = 0.8 + Math.random() * 0.7;
+            particle.style.animationDuration = `${duration}s`;
+
+            // --- 添加到卡片中 ---
+            card.appendChild(particle);
+
+            // --- 动画结束后移除元素 (节省性能) ---
+            setTimeout(() => {
+                particle.remove();
+            }, duration * 1000);
+        }
+    </script>
+</body>
+</html>
